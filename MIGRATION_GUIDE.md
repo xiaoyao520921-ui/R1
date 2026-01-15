@@ -71,10 +71,18 @@
 **风险等级**: `CRITICAL` (内网远程格式化威胁)
 
 ### **防御动作 (Countermeasures)**
-1. **云端镜像**: 确保 `mainline` 分支已完全推送到远程仓库。
-2. **断开挂载**: 物理搬家前，建议删除所有 `win_launcher.ps1 junctions` 创建的软链接，防止格式化波及挂载盘。
-3. **静默生存**: 启动 `R1_Executor.ps1 -mode autonomous`，进入无界面后台静默运行模式。
-4. **紧急离线**: 如果检测到大规模文件丢失，系统将自动触发最后一次云端同步并销毁本地非核心缓存。
+1. **云端镜像**: 核心数据已同步至 GitHub `main` 分支。
+2. **断开挂载**: 物理搬家前，建议执行 `win_launcher.ps1 stop` 并移除软链接。
+3. **静默生存**: 启动 `R1_Executor.ps1 -mode autonomous`。
+
+## 9. 局域网管理与远程格式化 (Remote Administration)
+**权限**: `Transparent (Owner)`
+**工具**: `02_EXECUTOR/Remote_Commander.ps1`
+
+### **执行流程**
+1. **指令下发**: 使用 `Remote_Commander.ps1 -TargetIP [IP]` 向员工电脑下发 `SYS_PURGE` 指令。
+2. **R1 配合**: 所有运行 R1 Executor 的机器将接收指令并执行预设的清理动作。
+3. **备份验证**: 格式化前，系统会自动检查 `04_FREEZONE/backups` 确保最新状态已上传至 GitHub。
 
 ---
 *系统已进入 CRITICAL 威胁防御状态。*

