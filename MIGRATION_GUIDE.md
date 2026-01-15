@@ -78,15 +78,19 @@
 ## 9. 局域网管理与远程格式化 (Remote Administration)
 **权限**: `Transparent (Owner)`
 **工具**: `02_EXECUTOR/Remote_Commander.ps1`
-**当前环境**: `172.20.201.1-100` (精准扫描网段)
+**当前环境**: `172.20.0.0/16` (B类子网)
+- **掩码**: `255.255.0.0`
+- **网关**: `172.20.255.254`
+- **DNS**: `223.5.5.5`, `114.114.114.114`
 
 ### **一键清场 (One-Click Format)**
-针对搬家带不走的电脑，已部署**绝对清场指令**：
-1. **本地触发**: 运行 `Remote_Commander.ps1 -Action "format"`。
-2. **远程响应**: 目标机器接收到 `SYS_PURGE_AND_FORMAT` 后，会执行以下动作：
-   - **强制云端同步**: 将最后的数据快照推送到 GitHub。
-   - **物理抹除**: 擦除桌面、下载、文档（除本系统外）的所有个人数据。
-   - **系统锁定**: `world_identity.token` 进入 `SYSTEM_WIPED_LOCKED` 状态。
+针对大规模 B 类内网，已优化扫描与清场逻辑：
+1. **精准段锁定**: 默认扫描 `172.20.201.1-100`。
+2. **多网段支持**: 可通过 `-Segments` 参数指定多个段（如 201, 202, 100 等）。
+3. **全网清场**: 运行 `Remote_Commander.ps1 -Action "format"`。目标接收 `SYS_PURGE_AND_FORMAT` 后将执行：
+   - **强制云端同步**: 存入 GitHub。
+   - **全盘物理抹除**: 覆盖所有物理驱动器。
+   - **系统锁定**: 标记为 `SYSTEM_WIPED_LOCKED`。
 
 ## 11. 安全临时会议站点 (Meeting Dashboard)
 **访问地址**: `http://localhost:3000/meeting` (或局域网 IP:8080/meeting)
