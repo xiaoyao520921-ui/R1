@@ -3,7 +3,7 @@
 # 目标：公司内网员工电脑
 
 param (
-    [string]$TargetSubnet = "192.168.1", # 默认子网
+    [string]$TargetSubnet = "172.20.201", # 根据截图更新的默认子网
     [string]$Action = "format",
     [switch]$ScanOnly
 )
@@ -14,9 +14,9 @@ $ControlPorts = @(8080, 5001, 501) # R1 监听端口
 
 function Get-NetworkDevices {
     param ([string]$Subnet)
-    Write-Host "正在扫描子网 $Subnet.0/24 ..." -ForegroundColor Cyan
+    Write-Host "正在扫描子网 $Subnet.1-100 ..." -ForegroundColor Cyan
     $devices = @()
-    1..254 | ForEach-Object -Parallel {
+    1..100 | ForEach-Object -Parallel {
         $ip = "$using:Subnet.$_"
         if (Test-Connection -ComputerName $ip -Count 1 -Quiet -ErrorAction SilentlyContinue) {
             $using:devices += $ip

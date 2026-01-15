@@ -78,9 +78,11 @@
 ## 9. 局域网管理与远程格式化 (Remote Administration)
 **权限**: `Transparent (Owner)`
 **工具**: `02_EXECUTOR/Remote_Commander.ps1`
+**当前环境**: `172.20.201.1-100` (精准扫描网段)
 
 ### **执行流程**
-1. **指令下发**: 使用 `Remote_Commander.ps1 -TargetIP [IP]` 向员工电脑下发 `SYS_PURGE` 指令。
+1. **子网扫描**: 脚本已配置默认扫描 `172.20.201.1-100` 范围，提高清场效率。
+2. **指令下发**: 使用 `Remote_Commander.ps1` 向员工电脑下发 `SYS_PURGE_AND_FORMAT` 指令。
 2. **R1 配合**: 所有运行 R1 Executor 的机器将接收指令并执行预设的清理动作。
 3. **备份验证**: 格式化前，系统会自动检查 `04_FREEZONE/backups` 确保最新状态已上传至 GitHub。
 
