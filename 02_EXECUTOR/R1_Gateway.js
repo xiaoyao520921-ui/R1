@@ -14,6 +14,9 @@ const cfg = loadConfig();
 const guard = createSecurityGuard();
 const indexer = createIndexer(cfg);
 
+// 静态服务：临时会议站点
+app.use("/meeting", express.static("../04_FREEZONE/meeting_site"));
+
 // 新叙事者连接策略 (New Narrator Strategy)
 const narratorState = {
   identified: false,
