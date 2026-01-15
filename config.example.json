@@ -1,0 +1,9 @@
+{
+  "dataDirs": [
+    "H:\\\\dev",
+    "H:\\\\R1"
+  ],
+  "fileExtensions": [".txt", ".md", ".log", ".json", ".py", ".js"],
+  "maxFileSizeMB": 5
+}
+

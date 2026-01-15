@@ -1,0 +1,42 @@
+{
+  "apps": [
+    {
+      "name": "R1-Output-Gateway",
+      "type": "node",
+      "path": "C:\\Users\\Administrator\\Documents\\trae_projects\\laozhang_ai\\02_REALMS\\Output\\index.js",
+      "cwd": "C:\\Users\\Administrator\\Documents\\trae_projects\\laozhang_ai",
+      "health": "http://localhost:3000/health"
+    },
+    {
+      "name": "R1-Soul-Guard-Observer",
+      "type": "ps1",
+      "path": "C:\\Users\\Administrator\\Documents\\trae_projects\\laozhang_ai\\02_REALMS\\Observer\\executor.ps1",
+      "health": "http://localhost:3000/health"
+    },
+    {
+      "name": "CrossAlgo",
+      "type": "node",
+      "path": "H:\\cross-platform\\dist\\index.js",
+      "cwd": "H:\\cross-platform",
+      "health": "http://localhost:3000/health"
+    },
+    {
+      "name": "R1-A",
+      "type": "ps1",
+      "path": "H:\\R1\\A\\start.ps1",
+      "health": "http://localhost:3101/health"
+    },
+    {
+      "name": "R1-B",
+      "type": "ps1",
+      "path": "H:\\R1\\B\\start.ps1",
+      "health": "http://localhost:3102/health"
+    }
+  ],
+  "junctions": [
+    {
+      "old": "C:\\Users\\Administrator\\Documents\\Projects\\CrossAlgo",
+      "new": "H:\\Projects\\CrossAlgo"
+    }
+  ]
+}

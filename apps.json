@@ -1,0 +1,23 @@
+{
+  "apps": [
+    {
+      "name": "R1-Output-Gateway",
+      "type": "node",
+      "path": "C:\\Users\\Administrator\\Documents\\trae_projects\\laozhang_ai\\02_EXECUTOR\\R1_Gateway.js",
+      "cwd": "C:\\Users\\Administrator\\Documents\\trae_projects\\laozhang_ai",
+      "health": "http://localhost:3000/health"
+    },
+    {
+      "name": "R1-Soul-Guard-Executor",
+      "type": "ps1",
+      "path": "C:\\Users\\Administrator\\Documents\\trae_projects\\laozhang_ai\\02_EXECUTOR\\R1_Executor.ps1",
+      "health": "http://localhost:3000/health"
+    }
+  ],
+  "junctions": [
+    {
+      "old": "C:\\Users\\Administrator\\Documents\\Projects\\CrossAlgo",
+      "new": "H:\\Projects\\CrossAlgo"
+    }
+  ]
+}
