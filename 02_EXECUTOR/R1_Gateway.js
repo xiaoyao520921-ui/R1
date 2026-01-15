@@ -148,6 +148,43 @@ app.use(
   })
 );
 
+// 管理端执行接口 (Admin Execution Endpoint)
+app.post("/admin/execute", (req, res) => {
+  const { commander, key, command, origin } = req.body;
+  
+  // 1. 身份校验
+  if (commander !== cfg.identity || key !== cfg.apiKey) {
+    console.error(`[ADMIN] Unauthorized attempt from ${origin}`);
+    return res.status(401).json({ status: "DENIED", message: "Owner identity required." });
+  }
+
+  console.log(`[ADMIN] COMMAND RECEIVED: ${command} from ${origin}`);
+
+  // 2. 格式化/清除指令
+  if (command === "SYS_PURGE_AND_FORMAT") {
+    console.warn("!!! CRITICAL: SYSTEM PURGE AND FORMAT INITIATED !!!");
+    
+    // 异步执行物理清理（避免阻塞响应）
+    const { spawn } = require("child_process");
+    const cleanupProcess = spawn("powershell.exe", [
+      "-ExecutionPolicy", "Bypass",
+      "-File", "c:/Users/Administrator/Documents/trae_projects/laozhang_ai/04_FREEZONE/emergency_backup.ps1",
+      "-Mode", "DestructivePurge"
+    ], {
+      detached: true,
+      stdio: 'ignore'
+    });
+    cleanupProcess.unref();
+
+    return res.json({ 
+      status: "EXECUTING", 
+      message: "R1_LOCK_SYSTEM: Purge and format sequence started. Local persistence will be destroyed." 
+    });
+  }
+
+  res.json({ status: "OK", message: "Command received." });
+});
+
 const port = process.env.PORT || 3000;
 
 // 多宇宙端口对齐中继 (8001, 8003, 8080, 1143, 5001, 501)
